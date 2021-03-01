@@ -37,7 +37,7 @@ void AExtractionZone::HandleOverlap(UPrimitiveComponent *OverlappedComponent, AA
 	{
 		AFPSGameMode* GM = Cast<AFPSGameMode>(GetWorld()->GetAuthGameMode());
 		if (GM)
-			GM->CompleteMission(MyPlayer);
+			GM->CompleteMission(MyPlayer, true);
 	} else
 		UGameplayStatics::PlaySound2D(this, MissingObjectiveSound);
 }

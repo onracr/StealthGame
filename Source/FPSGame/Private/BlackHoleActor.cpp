@@ -23,7 +23,7 @@ ABlackHoleActor::ABlackHoleActor()
 	EventHorizon->SetSphereRadius(100);
 	EventHorizon->SetupAttachment(Mesh);
 
-	EventHorizon->OnComponentBeginOverlap.AddDynamic(this, &ABlackHoleActor::OnComponentHit);
+	EventHorizon->OnComponentBeginOverlap.AddDynamic(this, &ABlackHoleActor::OnComponentBeginOverlap);
 
 }
 
@@ -55,7 +55,7 @@ void ABlackHoleActor::Tick(float DeltaTime)
 	}
 }
 
-void ABlackHoleActor::OnComponentHit(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
+void ABlackHoleActor::OnComponentBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
 	UE_LOG(LogTemp, Warning, TEXT("Event Horizon is Overlapped!"))
 	if (!OtherActor) return;
