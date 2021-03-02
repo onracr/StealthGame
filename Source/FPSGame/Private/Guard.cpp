@@ -5,6 +5,8 @@
 #include "Perception/PawnSensingComponent.h"
 #include "DrawDebugHelpers.h"
 #include "FPSGameMode.h"
+#include "Engine/TargetPoint.h"
+#include "Blueprint/AIBlueprintHelperLibrary.h"
 
 // Sets default values
 AGuard::AGuard()
@@ -18,6 +20,7 @@ AGuard::AGuard()
 	SensingComponent->OnHearNoise.AddDynamic(this, &AGuard::OnNoiseHeard);
 
 	GuardState = EGuardState::Idle;
+	bFlag = false;
 }
 
 // Called when the game starts or when spawned
@@ -33,6 +36,7 @@ void AGuard::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
+	SetPatrolRoute(DeltaTime);
 }
 
 void AGuard::SetGuardState(EGuardState NewState)
@@ -83,4 +87,24 @@ void AGuard::ResetOrientation()
 {
 	SetActorRotation(StartingRotation);
 	SetGuardState(EGuardState::Idle);
+}
+
+/**
+ * Simple AI Behaviour
+ */
+
+void AGuard::SetPatrolRoute(float DeltaTime)
+{
+	if (GuardState == EGuardState::Suspicious) return;
+
+	if (PatrolPoints.Num() > 0)
+	{
+		if (FVector::Dist(GetActorLocation(), PatrolPoints[bFlag]->GetActorLocation()) < 100.f)
+			bFlag = !bFlag;
+		// FVector NewLocation(FMath::VInterpTo(GetActorLocation(), PatrolPoints[bFlag]->GetActorLocation(), DeltaTime, .2f));
+		// SetActorRelativeLocation(NewLocation);
+
+		UAIBlueprintHelperLibrary::SimpleMoveToActor(GetController(), PatrolPoints[bFlag]);
+		
+	}
 }

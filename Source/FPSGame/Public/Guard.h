@@ -7,6 +7,7 @@
 #include "Guard.generated.h"
 
 class UPawnSensingComponent;
+class ATargetPoint;
 
 UENUM(BlueprintType)
 enum class EGuardState : uint8
@@ -33,9 +34,16 @@ protected:
 	FTimerHandle TimerHandle;
 	EGuardState GuardState;
 
+	UPROPERTY(EditInstanceOnly, Category=AI)
+	bool bFlag;
+
+	UPROPERTY(EditInstanceOnly, Category=AI, meta = (EditCondition="bFlag"))
+	TArray<ATargetPoint*> PatrolPoints;
+
 	virtual void BeginPlay() override;
 
 	void SetGuardState(EGuardState NewState);
+	void SetPatrolRoute(float DeltaTime);
 
 	UFUNCTION()
 	void OnPawnSeen(APawn* SeenPawn);
