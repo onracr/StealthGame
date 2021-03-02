@@ -32,7 +32,12 @@ protected:
 
 	FRotator StartingRotation;
 	FTimerHandle TimerHandle;
+
+	UPROPERTY(ReplicatedUsing=OnRep_GuardState)
 	EGuardState GuardState;
+
+	UFUNCTION()
+	void OnRep_GuardState();
 
 	UPROPERTY(EditInstanceOnly, Category=AI)
 	bool bFlag;

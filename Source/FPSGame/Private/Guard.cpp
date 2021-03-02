@@ -7,6 +7,7 @@
 #include "FPSGameMode.h"
 #include "Engine/TargetPoint.h"
 #include "Blueprint/AIBlueprintHelperLibrary.h"
+#include "Net/UnrealNetwork.h"
 
 // Sets default values
 AGuard::AGuard()
@@ -44,8 +45,20 @@ void AGuard::SetGuardState(EGuardState NewState)
 	if (GuardState == NewState) return;
 
 	GuardState = NewState;
+	OnRep_GuardState();	// for server!
 
-	OnStateChanged(NewState);
+}
+
+void AGuard::OnRep_GuardState()
+{
+	OnStateChanged(GuardState);
+}
+
+void AGuard::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+
+	DOREPLIFETIME(AGuard, GuardState); // "Net/UnrealNetwork.h"
 }
 
 void AGuard::OnPawnSeen(APawn* SeenPawn)
@@ -101,10 +114,10 @@ void AGuard::SetPatrolRoute(float DeltaTime)
 	{
 		if (FVector::Dist(GetActorLocation(), PatrolPoints[bFlag]->GetActorLocation()) < 100.f)
 			bFlag = !bFlag;
-		// FVector NewLocation(FMath::VInterpTo(GetActorLocation(), PatrolPoints[bFlag]->GetActorLocation(), DeltaTime, .2f));
-		// SetActorRelativeLocation(NewLocation);
+		FVector NewLocation(FMath::VInterpTo(GetActorLocation(), PatrolPoints[bFlag]->GetActorLocation(), DeltaTime, .2f));
+		SetActorRelativeLocation(NewLocation);
 
-		UAIBlueprintHelperLibrary::SimpleMoveToActor(GetController(), PatrolPoints[bFlag]);
+		// UAIBlueprintHelperLibrary::SimpleMoveToActor(GetController(), PatrolPoints[bFlag]);
 		
 	}
 }
