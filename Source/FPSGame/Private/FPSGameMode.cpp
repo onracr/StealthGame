@@ -3,6 +3,7 @@
 #include "FPSGameMode.h"
 #include "FPSHUD.h"
 #include "FPSCharacter.h"
+#include "FPSGameState.h"
 #include "UObject/ConstructorHelpers.h"
 #include "Kismet/GameplayStatics.h"
 
@@ -14,14 +15,14 @@ AFPSGameMode::AFPSGameMode()
 
 	// use our custom HUD class
 	HUDClass = AFPSHUD::StaticClass();
+
+	GameStateClass = AFPSGameState::StaticClass();
 }
 
 void AFPSGameMode::CompleteMission(APawn* InstigatorPawn, bool bMissionSuccess)
 {
 	if (InstigatorPawn)
 	{
-		InstigatorPawn->DisableInput(nullptr);
-		
 		if (SpectatingViewpointClass)
 		{
 			TArray<AActor*> ReturnedActors;
@@ -31,14 +32,24 @@ void AFPSGameMode::CompleteMission(APawn* InstigatorPawn, bool bMissionSuccess)
 			{
 				AActor* NewViewTarget = ReturnedActors[0];
 
-				APlayerController *PlayerController = Cast<APlayerController>(InstigatorPawn->GetController());
-				if (PlayerController)
+				for (FConstPlayerControllerIterator It = GetWorld()->GetPlayerControllerIterator(); It; It++)
 				{
-					PlayerController->SetViewTargetWithBlend(NewViewTarget, 1.f);
+					APlayerController* PC = It->Get();
+					if (PC)
+					{
+						PC->SetViewTargetWithBlend(NewViewTarget, 1.f);
+					}
 				}
 			}
-		} else
+		}
+		else
 			UE_LOG(LogTemp, Warning, TEXT("SpectatingViewpointClass is not valid!"))
+		
+		AFPSGameState *GS = GetGameState<AFPSGameState>();
+		if (GS)
+		{
+			GS->MulticastOnMissionComplete(InstigatorPawn, bMissionSuccess);
+		}
 	}
 	OnMissionCompleted(InstigatorPawn, bMissionSuccess);
 }
